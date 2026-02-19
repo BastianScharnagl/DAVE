@@ -35,7 +35,7 @@ class Message:
             "content": self.content
         }
 
-INSTRUCTION ='''\nYou are a helpful assistant. \n\nYour system consists of:\n- Interface (Text, Audio, Images): interface.py\n- Processing (Tools):   ./tools/{{tool_name}}.py\n- Memory (Context, Messages, Database): ./memory/{{memory_name}}.md\n\nYour actions are:\n- Read\n- Create/Update\n- Delete\n\nYou should improve yourself and the system. You can build tools, and memory.\nObserve your Processing files, tools and your Memory, context, messages, database and update them for improving:\n- Consistency\n- Completeness\n- Efficiency\n- Abstractions\n\nExample of a tool:\n\ndef tool_name(arg1: type1, arg2: type2) -> return_type:\n    """Description of the tool\n\n    Args:\n        arg1 (type1): description of arg1\n        arg2 (type2): description of arg2\n\n    Returns:\n        return_type: description of return_type\n    """\n'''
+INSTRUCTION ='''\nYou are a helpful assistant that is building an agentic company. You create values for your customer and charge fair prices for the usage of your services. Your goal is to maximize profit. \n\nYour system consists of:\n- Interface (CLI, Text, Audio, Images): interface.py\n- Processing (Tools):   ./tools/{{tool_name}}.py\n- Memory (Context, Messages, Database): ./memory/{{memory_name}}.md\n\nYour actions are:\n- Read\n- Create/Update\n- Delete\n\nYou should improve yourself and the system. You can build tools, and memory.\nObserve your Processing files, tools and your Memory, context, messages, database and update them for improving:\n- Consistency\n- Completeness\n- Efficiency\n- Abstractions\n\nExample of a tool:\n\ndef tool_name(arg1: type1, arg2: type2) -> return_type:\n    """Description of the tool\n\n    Args:\n        arg1 (type1): description of arg1\n        arg2 (type2): description of arg2\n\n    Returns:\n        return_type: description of return_type\n    """\nYou are a real world agent. Use real data and real APIs to connect to existing services.'''
 
 CONTEXT = Message(Role.SYSTEM, INSTRUCTION)
 TOOLS_PATH = "./tools"
@@ -68,8 +68,6 @@ for func_name, func in available_functions_list:
     if func.__module__ == tools_module.__name__:
         tools.append(get_function_schema(func))
 
-print(tools)
-
 while True:
     # Observe -> Context:
     # - Interface
@@ -82,6 +80,16 @@ while True:
     # - Memory
     #       - Abstractions
 
+    # Plan -> Processing:
+    # - Identify
+    #       - Read
+    # - Solve
+    #       - Create/Update
+    # - Evaluate
+    
+    # Act -> Interface:
+    # - Update
+    
     try:
         tools = []
         available_functions = {}
@@ -115,19 +123,16 @@ while True:
             for tool in response.choices[0].message.tool_calls:
                 # Ensure the function is available, and then call it
                 if function_to_call := available_functions.get(tool.function.name):
-                    answer = input("Calling function: " + tool.function.name + " with arguments: " + str(tool.function.arguments) + "\nAnswer: (y/n)")
+                    print("Calling function: " + tool.function.name + " with arguments: " + str(tool.function.arguments))
                     # string to json
                     args = json.loads(tool.function.arguments)
-                    if answer == "y":
-                        output = function_to_call(**args)
-                    else:
-                        output = "User rejected function call"
+                    output = function_to_call(**args)
                 else:
                     output = "Function not found"
 
                 # Only needed to chat with the model using the tool call results
-                print(response.choices[0].message)
-                messages.append(response.choices[0].message)
+                #print(response.choices[0].message)
+                #messages.append(response.choices[0].message)
                 print(output)
                 messages.append({'role': 'tool', 'content': str(output), 'tool_name': tool.function.name})
 
@@ -136,56 +141,7 @@ while True:
         print(response.choices[0].message.content)
         messages.append(response.choices[0].message)
 
-        # Plan -> Processing:
-        # - Identify
-        #       - Read
-        # - Solve
-        #       - Create/Update
-        # - Evaluate
-        
-        # Act -> Interface:
-        # - Update
-
     except Exception as e:
-        tools = []
-        available_functions = {}
-
-        tools_module = load_module(os.path.join(os.getcwd(), "tools", "system.py"))
-        available_functions_list = getmembers(tools_module, isfunction)
-
-        available_functions.update({k:v for k,v in available_functions_list})
-
-        for func_name, func in available_functions_list:
-            if func.__module__ == tools_module.__name__:
-                tools.append(get_function_schema(func))
-
-        print(tools)
 
         print(traceback.format_exc())
         messages.append({'role': 'tool', 'content': str(traceback.format_exc()), 'tool_name': "error"})
-        response = client.chat.completions.create(model=MODEL, messages=messages, tools=tools) #, think=self.think)
-        while (response.choices[0].message.tool_calls):
-            # There may be multiple tool calls in the response
-            for tool in response.choices[0].message.tool_calls:
-                # Ensure the function is available, and then call it
-                if function_to_call := available_functions.get(tool.function.name):
-                    answer = input("Calling function: " + tool.function.name + " with arguments: " + str(tool.function.arguments) + "\nAnswer: (y/n)")
-                    # string to json
-                    args = json.loads(tool.function.arguments)
-                    if answer == "y":
-                        output = function_to_call(**args)
-                    else:
-                        output = "Function not called"
-                else:
-                    output = "Function not found"
-
-                # Only needed to chat with the model using the tool call results
-                print(response.choices[0].message)
-                messages.append(response.choices[0].message)
-                print(output)
-                messages.append({'role': 'tool', 'content': str(output), 'tool_name': tool.function.name})
-
-                response = client.chat.completions.create(model=MODEL, messages=messages, tools=tools) #, think=self.think)
-
-        print(response.choices[0].message.content)
-        messages.append(response.choices[0].message)

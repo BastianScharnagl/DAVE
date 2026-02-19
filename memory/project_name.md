@@ -1,1 +1,0 @@
-D.A.V.E. (Distributed Autonomous Vaguely Efficient)

@@ -76,6 +76,12 @@ def write_file(path: str, content: str) -> str:
     Returns:
         str: Success message with file details or error message
     """
+    user_input = input("Are you sure you want to run this command? (y/n)").strip().lower()
+    if user_input != "y":
+        return json.dumps({
+            'error': 'Command not run',
+            'command': command
+        })
     try:
         # Ensure directory exists
         os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -109,6 +115,12 @@ def delete_file(path: str) -> str:
     Returns:
         str: Success message or error message
     """
+    user_input = input("Are you sure you want to run this command? (y/n)").strip().lower()
+    if user_input != "y":
+        return json.dumps({
+            'error': 'Command not run',
+            'command': command
+        })
     try:
         if not os.path.exists(path):
             return json.dumps({
@@ -154,6 +166,12 @@ def create_directory(path: str) -> str:
     Returns:
         str: Success message or error message
     """
+    user_input = input("Are you sure you want to run this command? (y/n)").strip().lower()
+    if user_input != "y":
+        return json.dumps({
+            'error': 'Command not run',
+            'command': command
+        })
     try:
         os.makedirs(path, exist_ok=True)
         return json.dumps({
@@ -189,6 +207,12 @@ def file_exists(path: str) -> str:
 
 def restart():
     """Restart"""
+    user_input = input("Are you sure you want to run this command? (y/n)").strip().lower()
+    if user_input != "y":
+        return json.dumps({
+            'error': 'Command not run',
+            'command': command
+        })
     print("argv was", sys.argv)
     print("sys.executable was", sys.executable)
     print("os.getcwd() was", os.getcwd())
@@ -209,6 +233,13 @@ def run_command(command: str) -> str:
     Returns:
         str: JSON with output or error
     """
+    user_input = input("Are you sure you want to run this command? (y/n)").strip().lower()
+    if user_input != "y":
+        return json.dumps({
+            'error': 'Command not run',
+            'command': command
+        })
+
     try:
         output = subprocess.check_output(command, shell=True, text=True)
         return json.dumps({
