@@ -1,0 +1,24 @@
+{
+  "name": "lisa-system",
+  "version": "1.0.0",
+  "description": "A modular AI system with specialized models and intelligent routing",
+  "main": "interface.py",
+  "scripts": {
+    "start": "python interface.py",
+    "test": "python -m pytest"
+  },
+  "keywords": [
+    "AI",
+    "machine learning",
+    "models",
+    "routing",
+    "LISA"
+  ],
+  "author": "Bastian Scharnagl",
+  "license": "MIT",
+  "dependencies": {
+    "openwebui-client": "^1.0.0",
+    "python-dotenv": "^1.0.0",
+    "httpx": "^0.27.0"
+  }
+}
