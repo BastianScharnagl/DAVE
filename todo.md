@@ -1,4 +1,0 @@
-- [ ] Implement self-reflection module
-- [ ] Create a tool to abstract memories into new memories to save tokens
-- [ ] Connect memory to a real world database
-- [ ] Build a safe web frontend for external users

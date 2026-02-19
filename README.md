@@ -73,3 +73,11 @@ It is reserved for text files, database files, and other files that help the age
 - `read_memory(name: str)`: Reads a memory
 - `create_memory(name: str, content: str)`: Creates a memory
 - `delete_memory(name: str)`: Deletes a memory
+
+# ToDos
+
+- [ ] Implement self-reflection module
+- [ ] Create a tool to abstract memories into new memories to save tokens
+- [ ] Connect memory to a real world database
+- [ ] Build a safe web frontend for external users.
+- [ ] You can discover models for specific use cases with the command `curl -H "Authorization: Bearer API_KEY" https://chat-1.ki-awz.iisys.de/api/models`. Make use of this models by calling them via a tool.
