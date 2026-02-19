@@ -56,18 +56,6 @@ client = OpenWebUIClient(
     http_client=http_client
 )
 
-tools = []
-available_functions = {}
-
-tools_module = load_module(os.path.join(os.getcwd(), "tools", "system.py"))
-available_functions_list = getmembers(tools_module, isfunction)
-
-available_functions.update({k:v for k,v in available_functions_list})
-
-for func_name, func in available_functions_list:
-    if func.__module__ == tools_module.__name__:
-        tools.append(get_function_schema(func))
-
 while True:
     # Observe -> Context:
     # - Interface
@@ -99,18 +87,15 @@ while True:
                 tools_module = load_module(os.path.join(os.getcwd(), "tools", tool_path))
                 available_functions_list = getmembers(tools_module, isfunction)
 
-        available_functions.update({k:v for k,v in available_functions_list})
+                available_functions.update({k:v for k,v in available_functions_list})
 
-        for func_name, func in available_functions_list:
-            if func.__module__ == tools_module.__name__:
-                tools.append(get_function_schema(func))
+                for func_name, func in available_functions_list:
+                    if func.__module__ == tools_module.__name__:
+                        tools.append(get_function_schema(func))
 
-        user_input = input("You: ")
+        user_input = input("Your message: ")
         if user_input != "\n":
             messages.append(Message(Role.USER, user_input).toJSON())
-
-        # response = client.chat_with_tools(messages=messages, tools=tools, tool_params=None, model=MODEL, max_tool_calls=None, files=None)
-        # response = client.chat_with_tools(messages=messages, tools=tools, model=MODEL)
 
         response = client.chat.completions.create(
             model=MODEL,
@@ -130,9 +115,6 @@ while True:
                 else:
                     output = "Function not found"
 
-                # Only needed to chat with the model using the tool call results
-                #print(response.choices[0].message)
-                #messages.append(response.choices[0].message)
                 print(output)
                 messages.append({'role': 'tool', 'content': str(output), 'tool_name': tool.function.name})
 

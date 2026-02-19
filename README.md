@@ -30,14 +30,16 @@ This directory contains tools to use by the agent.
 
 ## tools/system.py
 
-- `list_directory_contents(path: str)`: Lists the contents of a directory
+- `file_exists(path: str)`: Checks if a file exists
 - `read_file(path: str)`: Reads the contents of a file
 - `write_file(path: str, content: str)`: Writes the contents of a file
 - `delete_file(path: str)`: Deletes a file
+- `directory_exists(path: str)`: Checks if a directory exists
+- `read_directory(path: str)`: Reads the contents of a directory
 - `create_directory(path: str)`: Creates a directory
-- `file_exists(path: str)`: Checks if a file exists
-- `restart()`: Restarts the agent
+- `delete_directory(path: str)`: Deletes a directory
 - `run_command(command: str)`: Runs a command
+- `restart()`: Restarts the agent
 
 ## Purpose
 
@@ -65,3 +67,9 @@ def tool_name(args: dict) -> str:
 
 This directory contains the memory of the agent.
 It is reserved for text files, database files, and other files that help the agent to remember things.
+
+## tools/memory.py
+
+- `read_memory(name: str)`: Reads a memory
+- `create_memory(name: str, content: str)`: Creates a memory
+- `delete_memory(name: str)`: Deletes a memory
