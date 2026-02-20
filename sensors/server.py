@@ -1,21 +1,58 @@
-from openwebui_client import OpenWebUIClient
-import os
+from fastapi import FastAPI
 import json
 import traceback
 from enum import Enum
-from utils import load_module, get_function_schema
 from inspect import getmembers, isfunction
+
+import importlib.util
+import sys
+import string
+import secrets
+import inspect
 
 import httpx
 from dotenv import load_dotenv
+import logging
+from openwebui_client import OpenWebUIClient
 
-#import logging
-#logging.basicConfig(filename="main.log", level=logging.DEBUG)
+import os
+import argparse
+import uvicorn
+
+def gensym(length=32, prefix="gensym_"):
+    """
+    generates a fairly unique symbol, used to make a module name,
+    used as a helper function for load_module
+
+    :return: generated symbol
+    """
+    alphabet = string.ascii_uppercase + string.ascii_lowercase + string.digits
+    symbol = "".join([secrets.choice(alphabet) for i in range(length)])
+
+    return prefix + symbol
 
 
-MODEL="lisa-v40-rc1-qwen3235b-a22b-instruct"
+def load_module(source, module_name=None):
+    """
+    reads file source and loads it as a module
 
-def init() -> tuple[OpenWebUIClient, list[dict]]:
+    :param source: file to load
+    :param module_name: name of module to register in sys.modules
+    :return: loaded module
+    """
+
+    if module_name is None:
+        module_name = gensym()
+
+    spec = importlib.util.spec_from_file_location(module_name, source)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+
+    return module
+
+
+def init(model: str = "lisa-v40-rc1-qwen3235b-a22b-instruct") -> tuple[OpenWebUIClient, list[dict]]:
     """Initialize the LLM client and register tools
 
     Returns:
@@ -23,7 +60,6 @@ def init() -> tuple[OpenWebUIClient, list[dict]]:
     """
 
     load_dotenv()
-
     # ---------------------------------------------------------------------------
     # Initialization of LLM client 
     # https://github.com/bemade/openwebui-client
@@ -33,7 +69,7 @@ def init() -> tuple[OpenWebUIClient, list[dict]]:
     client = OpenWebUIClient(
         api_key=os.getenv("KI_AWZ_API_KEY"),
         base_url=os.getenv("KI_AWZ_API_URL"),
-        default_model=MODEL,
+        default_model=model,
         http_client=http_client,
     )
 
@@ -85,55 +121,37 @@ def init() -> tuple[OpenWebUIClient, list[dict]]:
     )
     print(response)
     """
-
     return client, messages
 
-if __name__ == "__main__":
-    client, messages = init()
+parser = argparse.ArgumentParser()
+parser.add_argument('--port', default=8000)
+parser.add_argument('--model', default="lisa-v40-rc1-qwen3235b-a22b-instruct")
+args = parser.parse_args()
 
-    """
-    system_message = {"role": "system", "content": "Run the internet server with command python sensors/server.py --port 8000 --model lisa-code-101 in background to have a programmer working for you"}
+client, messages = init(args.model)
 
-    messages.append(system_message)
+# ---------------------------------------------------------------------------
+# Initialization of API Route to interface with agent 
+# https://fastapi.tiangolo.com/
+# ---------------------------------------------------------------------------
+
+app = FastAPI()
+
+@app.post("/chat")
+def chat(message: str):
+    messages.append({
+        "role": "user",
+        "content": message
+    })
 
     response = client.chat_with_tools(
         messages=messages,
-        max_tool_calls=10
+        max_tool_calls=5
     )
-    print(response)
-    """
-    
-    # ---------------------------------------------------------------------------
-    # Main agent loop
-    # ---------------------------------------------------------------------------
-    while True:
-        # SENSE
-        # Observe yourself and your environment
 
-        # THINK
-        # Plan your actions
+    print("[MAIN]", response)
 
-        # ACT
-        # Create and register new tools. Explore APIs. Refactor and restructurize your code.
+    return response
 
-        try:       
-            # --- User input ---
-            user_input = input("Your message: ")
-            if user_input != "\n":
-                messages.append({
-                    "role": "user",
-                    "content": user_input
-                })
-
-            response = client.chat_with_tools(
-                messages=messages,
-                max_tool_calls=5
-            )
-
-            print("[MAIN]", response)
-            messages.append({"role": "assistant", "content": response})
-
-        except Exception:
-            exception_string = traceback.format_exc()
-            print("[ERROR]", exception_string)
-            messages.append({"role": "system", "content": exception_string})
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=int(args.port))

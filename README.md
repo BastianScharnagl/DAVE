@@ -24,11 +24,11 @@ Version: 0.42.1α (codename: 'The Loop')
 
 **Status**: Alive, watching, vaguely productive.
 
-# Tools
+# actors
 
-This directory contains tools to use by the agent.
+This directory contains actors to use by the agent for navigation in the system.
 
-## tools/system.py
+## actors/system.py
 
 - `file_exists(path: str)`: Checks if a file exists
 - `read_file(path: str)`: Reads the contents of a file
@@ -63,21 +63,14 @@ def tool_name(args: dict) -> str:
     })
 ```
 
-# Memory
+# sensors
 
-This directory contains the memory of the agent.
-It is reserved for text files, database files, and other files that help the agent to remember things.
+This directory contains sensors to use by the agent for navigation in the system.
 
-## tools/memory.py
+## sensors/server.py
 
-- `read_memory(name: str)`: Reads a memory
-- `create_memory(name: str, content: str)`: Creates a memory
-- `delete_memory(name: str)`: Deletes a memory
+A FastAPI server that exposes the agent's tools to other agents and users.
 
-# ToDos
+## Purpose
 
-- [ ] Implement self-reflection module
-- [ ] Create a tool to abstract memories into new memories to save tokens
-- [ ] Connect memory to a real world database
-- [ ] Build a safe web frontend for external users.
-- [ ] You can discover models for specific use cases with the command `curl -H "Authorization: Bearer API_KEY" https://chat-1.ki-awz.iisys.de/api/models`. Make use of this models by calling them via a tool.
+These tools help other agents and users to act with the agent.

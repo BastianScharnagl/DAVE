@@ -4,6 +4,7 @@ import sys
 import subprocess
 from datetime import datetime
 from typing import Dict, List, Any, Optional
+import shlex
 
 def file_exists(path: str) -> str:
     """Check if a file exists
@@ -43,7 +44,7 @@ def write_file(path: str, content: str) -> str:
     Returns:
         str: Status message
     """
-    user_input = input("Are you sure you want to write this file? (y/n)").strip().lower()
+    user_input = input(f"Are you sure you want to write file {path}? (y/n)").strip().lower()
     if user_input != "y":
         return f'User denied tool write_file {path}'
 
@@ -51,7 +52,7 @@ def write_file(path: str, content: str) -> str:
         f.write(content)
             
     return f'File {path} written successfully.'
-
+    
 def delete_file(path: str) -> str:
     """Delete a file
 
@@ -61,27 +62,35 @@ def delete_file(path: str) -> str:
     Returns:
         str: Status message
     """
-    user_input = input("Are you sure you want to delete this file? (y/n)").strip().lower()
+    user_input = input(f"Are you sure you want to delete file {path}? (y/n)").strip().lower()
     if user_input != "y":
         return f'User denied tool delete_file {path}'
     
     os.remove(path)
     return f'File {path} deleted successfully.'
 
-def read_directory(path: str) -> str:
-    """List the contents of a directory
+def read_directory(path: str) -> list[str]:
+    """Recursively list the contents of a directory
 
     Args:
         path (str): The path to the directory
 
     Returns:
-        str: Existence status
+        str: List of files
     """
-    if os.path.isdir(path):
-        return f'Directory {path} exists.'
-    else:
-        return f'Directory {path} does not exist.'
+    #user_input = input(f"Are you sure you want to read directory {path}? (y/n)").strip().lower()
+    #if user_input != "y":
+    #    return f'User denied tool read_directory {path}'
 
+    dirs = os.listdir(path)
+    files = []
+    for obj in dirs:
+        if os.path.isfile(os.path.join(path,obj)) and not obj.startswith("."):
+            files.append(os.path.join(path,obj))
+        elif os.path.isdir(os.path.join(path,obj)) and not path.startswith("/") and not ".git" in obj and not "__pycache__" in obj:
+            d = read_directory(os.path.join(path, obj))
+            files.extend(d)
+    return files
 
 def create_directory(path: str) -> str:
     """Create a directory and any parent directories if needed
@@ -92,14 +101,14 @@ def create_directory(path: str) -> str:
     Returns:
         str: Status message
     """
-    user_input = input("Are you sure you want to create this directory? (y/n)").strip().lower()
+    user_input = input(f"Are you sure you want to create directory {path}? (y/n)").strip().lower()
     if user_input != "y":
         return f'User denied tool create_directory {path}'
     
     os.makedirs(path, exist_ok=True)
     return f'Directory {path} created successfully.'
 
-def run_command(command: str) -> str:
+def run_command(command: str, background: bool = False) -> str:
     """Run a command and return the output
 
     Args:
@@ -108,12 +117,17 @@ def run_command(command: str) -> str:
     Returns:
         str: Status message
     """
-    user_input = input("Are you sure you want to run this command? (y/n)").strip().lower()
+    user_input = input(f"Are you sure you want to run command {command}? (y/n)").strip().lower()
     if user_input != "y":
         return f'User denied tool run_command {command}'
-
-    output = subprocess.check_output(command, shell=True, text=True)
-    return f'Command {command} executed with output: {output}'
+    if background:
+        args = shlex.split(command)
+        p = subprocess.Popen(args)
+        print(p)
+        return f'Command {command} executed in background.'
+    else:
+        output = subprocess.check_output(command, shell=True, text=True)
+        return f'Command {command} executed with output: {output}'
 
 def restart():
     """Restart the agent

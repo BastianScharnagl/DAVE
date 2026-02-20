@@ -31,3 +31,5 @@ local_settings.py
 *.sublime-workspace
 .DS_Store
 Thumbs.db
+memory/
+uploads/
