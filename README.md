@@ -24,11 +24,27 @@ Version: 0.42.1α (codename: 'The Loop')
 
 **Status**: Alive, watching, vaguely productive.
 
-# actors
+## Project Structure
 
-This directory contains actors to use by the agent for navigation in the system.
+```
+DAVE/
+├── data/
+├── interfaces/
+│   └── server.py
+├── tools/
+│   ├── brave_search.py
+│   └── system.py
+├── main.md
+├── main.py
+├── README.md
+└── utils.py
+```
 
-## actors/system.py
+# tools
+
+This directory contains tools to use by the agent for navigation and acting in the system.
+
+## tools/system.py
 
 - `file_exists(path: str)`: Checks if a file exists
 - `read_file(path: str)`: Reads the contents of a file
@@ -40,6 +56,10 @@ This directory contains actors to use by the agent for navigation in the system.
 - `delete_directory(path: str)`: Deletes a directory
 - `run_command(command: str)`: Runs a command
 - `restart()`: Restarts the agent
+
+## tools/brave_search.py
+
+- `brave_search(query: str, count: int = 10, offset: int = 0)`: Perform a web search using the Brave Search API.
 
 ## Purpose
 
@@ -63,9 +83,9 @@ def tool_name(args: dict) -> str:
     })
 ```
 
-# sensors
+# interfaces
 
-This directory contains sensors to use by the agent for navigation in the system.
+This directory contains interfaces to use by other agents and users.
 
 ## sensors/server.py
 
