@@ -87,7 +87,7 @@ def tool_name(args: dict) -> str:
 
 This directory contains interfaces to use by other agents and users.
 
-## sensors/server.py
+## interfaces/server.py
 
 A FastAPI server that exposes the agent's tools to other agents and users.
 
