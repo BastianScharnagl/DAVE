@@ -78,9 +78,6 @@ def read_directory(path: str) -> list[str]:
     Returns:
         str: List of files
     """
-    #user_input = input(f"Are you sure you want to read directory {path}? (y/n)").strip().lower()
-    #if user_input != "y":
-    #    return f'User denied tool read_directory {path}'
 
     dirs = os.listdir(path)
     files = []
@@ -91,7 +88,7 @@ def read_directory(path: str) -> list[str]:
             d = read_directory(os.path.join(path, obj))
             files.extend(d)
     return files
-
+    
 def create_directory(path: str) -> str:
     """Create a directory and any parent directories if needed
 
@@ -105,8 +102,11 @@ def create_directory(path: str) -> str:
     if user_input != "y":
         return f'User denied tool create_directory {path}'
     
-    os.makedirs(path, exist_ok=True)
-    return f'Directory {path} created successfully.'
+    try:
+        os.makedirs(path)
+        return f'Directory {path} created successfully.'
+    except OSError as e:
+        return f'Directory {path} already exists.'
 
 def run_command(command: str, background: bool = False) -> str:
     """Run a command and return the output

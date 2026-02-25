@@ -27,7 +27,7 @@ Version: 0.42.1α (codename: 'The Loop')
 ## Project Structure
 
 ```
-DAVE/
+./
 ├── data/
 ├── interfaces/
 │   └── server.py
